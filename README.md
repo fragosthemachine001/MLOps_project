@@ -21,6 +21,7 @@ The project leverages the following technologies and tools:
 - **Hydra & YAML** – Dynamic configuration and hyperparameter management
 - **Weights & Biases (W&B)** – Experiment tracking and performance logging
 - **Docker** – Containerization and environment portability
+- **Pytorch Lightning** - Reduce boilerplate code
 
 ---
 
