@@ -1,20 +1,12 @@
 from pathlib import Path
-import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.patches import Rectangle
-import numpy as np
-import typer
-from sklearn.model_selection import train_test_split, GridSearchCV
-from imblearn.over_sampling import SMOTE
-from torch.utils.data import Dataset
+
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.preprocessing import StandardScaler
-import typer
 import torch.nn as nn
 import torch.optim as optim
+import typer
+from torch.utils.data import DataLoader, TensorDataset
 
-from credit_card_fraud_analysis.data import transform_data, generate_train_data, preprocess_data
+from credit_card_fraud_analysis.data import preprocess_data
 from credit_card_fraud_analysis.model import Autoencoder
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"

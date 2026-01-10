@@ -1,18 +1,14 @@
 from datetime import datetime
 from pathlib import Path
+
 import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.patches import Rectangle
 import numpy as np
-import typer
-from sklearn.model_selection import train_test_split, GridSearchCV
-from imblearn.over_sampling import SMOTE
-from torch.utils.data import Dataset
+import pandas as pd
 import torch
-from torch.utils.data import DataLoader, TensorDataset
+import typer
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import torch.nn as nn
-import torch.optim as optim
 
 RAW_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 

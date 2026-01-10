@@ -7,9 +7,6 @@ reports/figures/*
 reports/*
 !reports/.gitkeep
 
-data/*
-!data/.gitkeep
-
 data/raw/*
 !data/raw/.gitkeep
 

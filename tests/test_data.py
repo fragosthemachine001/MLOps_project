@@ -1,6 +1,5 @@
-from torch.utils.data import Dataset
-
 from credit_card_fraud_analysis.data import MyDataset
+from torch.utils.data import Dataset
 
 
 def test_my_dataset():
