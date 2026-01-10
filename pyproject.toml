@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "credit_card_fraud_analysis"
+version = "0.0.1"
+description = "Classification of fraudulent and legitimate credit card transactions using machine learning"
+authors = [
+  { name = "Christos Psallidas", email = "s253542@dtu.dk" },
+  { name = "Dimitrios Dimitriou", email = "s253560@dtu.dk" },
+  { name = "Dionysios Sellinas", email = "s242973@dtu.dk" },
+  { name = "Georgios Fragkiadoulakis", email = "s242831@dtu.dk" },
+]
+keywords = ["machine learning", "MLOps"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["I", "F", "E"]
+
+[tool.coverage.run]
+omit = ["tests/*"]
