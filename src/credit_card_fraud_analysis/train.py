@@ -1,49 +1,86 @@
 from pathlib import Path
-import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.patches import Rectangle
-import numpy as np
-import typer
-from sklearn.model_selection import train_test_split, GridSearchCV
-from imblearn.over_sampling import SMOTE
-from torch.utils.data import Dataset
-import torch
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.preprocessing import StandardScaler
-import typer
-import torch.nn as nn
-import torch.optim as optim
 
-from credit_card_fraud_analysis.data import transform_data, generate_train_data, preprocess_data
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+import typer
+import hydra
+from hydra import compose, initialize
+
+from credit_card_fraud_analysis.data import preprocess_data
+# Import your local modules
+from credit_card_fraud_analysis.data import preprocess_data
 from credit_card_fraud_analysis.model import Autoencoder
 
+MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
 app = typer.Typer()
+
 
 @app.command()
 def train():
-    X_train, _, _, _, X_train_tensor, X_test_tensor = preprocess_data()
+    with initialize(version_base="1.2", config_path="../../configs"):
+        config = compose(config_name="config")
 
-    # Create DataLoader
+    torch.manual_seed(config.seed)
+
+    # 1. Load Data
+    print("Preprocessing data...")
+    X_train, _, _, _, X_train_tensor, _ = preprocess_data()
+
+    # 2. Create DataLoader
     train_dataset = TensorDataset(X_train_tensor, X_train_tensor)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=config.training.batch_size,
+        shuffle=True,
+        num_workers=0
+    )
 
-    # Initialize model
-    autoencoder = Autoencoder(X_train.shape[1])
+    # 3. Initialize model and move to device
+    device = torch.device(config.device)
+    input_dim = X_train.shape[1]
+    autoencoder = Autoencoder(
+        input_dim=input_dim,
+        hidden_dim=config.model.hidden_dim,
+        dropout=config.model.dropout
+    ).to(device)
+
+    # 4. Optimizer & Loss
+    opt_class = getattr(torch.optim, config.training.optimizer)
+    optimizer = opt_class(
+        autoencoder.parameters(),
+        lr=config.training.lr,
+        weight_decay=config.training.weight_decay
+    )
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(autoencoder.parameters(), lr=0.001)
 
-    # Train the autoencoder
-    epochs = 50
-    for epoch in range(epochs):
+    print(f"Starting training on {device}...")
+
+    # 5. Training Loop
+    autoencoder.train()
+    for epoch in range(config.training.epochs):
+        epoch_loss = 0.0
         for batch_data, _ in train_loader:
+            # IMPORTANT: Move data to device to prevent freeze
+            batch_data = batch_data.to(device)
+
             optimizer.zero_grad()
             reconstructed = autoencoder(batch_data)
             loss = criterion(reconstructed, batch_data)
             loss.backward()
             optimizer.step()
+            epoch_loss += loss.item()
 
         if (epoch + 1) % 10 == 0:
-            print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}')
+            avg_loss = epoch_loss / len(train_loader)
+            print(f'Epoch [{epoch + 1}/{config.training.epochs}], Loss: {avg_loss:.4f}')
+
+    # 6. Save Model
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    model_path = MODELS_DIR / config.evaluation.model_filename
+    torch.save(autoencoder.state_dict(), model_path)
+    print(f"Training complete. Model saved to: {model_path}")
+
 
 if __name__ == "__main__":
     app()

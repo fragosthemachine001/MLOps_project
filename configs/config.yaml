@@ -1,0 +1,25 @@
+# Global settings
+seed: 42
+device: "cpu" # or "cuda"
+
+# Model architecture
+model:
+  hidden_dim: 32
+  latent_dim: 16
+  dropout: 0.1
+
+# Training hyperparameters
+training:
+  batch_size: 64
+  lr: 0.001
+  epochs: 50
+  optimizer: "Adam"
+  weight_decay: 1e-5
+  early_stopping_patience: 5
+
+# Evaluation and Anomaly Detection
+evaluation:
+  threshold_percentile: 95
+  model_filename: "autoencoder.pt"
+  metrics: ["precision", "recall", "f1", "roc_auc"]
+  save_plots: True

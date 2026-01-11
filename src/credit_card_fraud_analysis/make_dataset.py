@@ -1,5 +1,5 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 RAW_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 PROCESSED_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "processed"

@@ -1,19 +1,16 @@
 from datetime import datetime
 from pathlib import Path
-import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.patches import Rectangle
-import numpy as np
-import typer
-from sklearn.model_selection import train_test_split, GridSearchCV
-from imblearn.over_sampling import SMOTE
-from torch.utils.data import Dataset
-import torch
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.preprocessing import StandardScaler
-import torch.nn as nn
-import torch.optim as optim
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import torch
+import typer
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+RAW_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 
 def prep_data(df: pd.DataFrame) -> (np.ndarray, np.ndarray):
     """
@@ -28,8 +25,7 @@ def prep_data(df: pd.DataFrame) -> (np.ndarray, np.ndarray):
 
 def compare_plot(X: np.ndarray, y: np.ndarray, X_resampled: np.ndarray, y_resampled: np.ndarray, method: str):
     # Ensure the directory exists
-    output_dir = Path("data/reports/figures")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    FIGURES_DIR = Path(__file__).resolve().parents[2] / "reports" / "figures"
 
     plt.figure(figsize=(12, 6))  # Create a new figure to avoid overlapping
 
@@ -51,7 +47,7 @@ def compare_plot(X: np.ndarray, y: np.ndarray, X_resampled: np.ndarray, y_resamp
 
     # Dynamic filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    save_path = output_dir / f"comparison_{method}_{timestamp}.png"
+    save_path = FIGURES_DIR / f"comparison_{method}_{timestamp}.png"
 
     # Save and close
     plt.savefig(save_path)
@@ -87,7 +83,7 @@ def transform_data(X_train, X_test):
     return X_train_tensor, X_test_tensor
 
 def preprocess_data():
-    df = pd.read_csv("data/raw/creditcard.csv")
+    df = pd.read_csv(RAW_DATA_DIR / "creditcard.csv")
     df.info()
     df.head()
     # Count the occurrences of fraud and no fraud and print them

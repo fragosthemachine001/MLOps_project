@@ -1,4 +1,19 @@
-data
+models/*
+!models/.gitkeep
+
+reports/figures/*
+!reports/figures/.gitkeep
+
+reports/*
+!reports/.gitkeep
+
+data/raw/*
+!data/raw/.gitkeep
+
+data/processed/*
+!data/processed/.gitkeep
+
+
 docs/site/
 
 # test cache
