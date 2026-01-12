@@ -20,9 +20,7 @@ app = typer.Typer()
 def evaluate(config):
     X_train, X_test, _, y_test, _, X_test_tensor = preprocess_data()
     autoencoder = Autoencoder(X_train.shape[1], hidden_dim=config.model.hidden_dim)
-    autoencoder.load_state_dict(
-        torch.load(MODELS_DIR / "autoencoder.pt", map_location=torch.device("cpu"))
-    )
+    autoencoder.load_state_dict(torch.load(MODELS_DIR / "autoencoder.pt", map_location=torch.device("cpu")))
 
     autoencoder.eval()
     with torch.no_grad():
@@ -46,6 +44,7 @@ def evaluate(config):
     if "roc_auc" in config.evaluation.metrics:
         auc = roc_auc_score(y_test, errors)
         print(f"ROC AUC Score: {auc:.4f}")
+
 
 if __name__ == "__main__":
     app()
