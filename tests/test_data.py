@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
 from credit_card_fraud_analysis.data import MyDataset
 from torch.utils.data import Dataset
 

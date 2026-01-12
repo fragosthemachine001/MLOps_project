@@ -9,9 +9,24 @@ import typer
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from torch.utils.data import Dataset
 
 RAW_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 
+class MyDataset(Dataset):
+    """My custom dataset."""
+
+    def __init__(self, data_path: Path) -> None:
+        self.data_path = data_path
+
+    def __len__(self) -> int:
+        """Return the length of the dataset."""
+
+    def __getitem__(self, index: int):
+        """Return a given sample from the dataset."""
+
+    def preprocess(self, output_folder: Path) -> None:
+        """Preprocess the raw data and save it to the output folder."""
 
 def prep_data(df: pd.DataFrame) -> (np.ndarray, np.ndarray):
     """
