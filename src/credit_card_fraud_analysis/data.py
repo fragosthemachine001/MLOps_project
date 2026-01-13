@@ -13,6 +13,7 @@ from torch.utils.data import Dataset
 
 RAW_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 
+
 class MyDataset(Dataset):
     """My custom dataset."""
 
@@ -27,6 +28,7 @@ class MyDataset(Dataset):
 
     def preprocess(self, output_folder: Path) -> None:
         """Preprocess the raw data and save it to the output folder."""
+
 
 def prep_data(df: pd.DataFrame) -> (np.ndarray, np.ndarray):
     """

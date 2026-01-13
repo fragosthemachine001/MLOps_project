@@ -11,7 +11,7 @@ Main goal of this project is to design and evaluate a machine learning system ca
 The project leverages the following technologies and tools:
 
 - **Python**
-- **Uv** - Create virtual environments and manage dependencies 
+- **Uv** - Create virtual environments and manage dependencies
 - **Git** – Version control
 - **scikit-learn** – Machine learning algorithms and preprocessing pipelines
 - **PyTorch** – Neural network implementation
@@ -41,7 +41,7 @@ A variety of models can be deployed but initially an Autoencoder that learns to 
 
 To download the dataset, follow these steps after cloning the repository:
 
-1. Make sure you have a **Kaggle API token** on your computer.  
+1. Make sure you have a **Kaggle API token** on your computer.
    Follow the official Kaggle guide to create and configure your token: [Kaggle API Guide](https://www.kaggle.com/docs/api).
 
 2. Run the dataset script to download the data:

@@ -2,9 +2,8 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
 import typer
-
+from torch.utils.data import DataLoader, TensorDataset
 
 from credit_card_fraud_analysis.data import preprocess_data
 from credit_card_fraud_analysis.hydra_config_loader import load_config
@@ -26,29 +25,18 @@ def train():
 
     # 2. Create DataLoader
     train_dataset = TensorDataset(X_train_tensor, X_train_tensor)
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.training.batch_size,
-        shuffle=True,
-        num_workers=4
-    )
+    train_loader = DataLoader(train_dataset, batch_size=config.training.batch_size, shuffle=True, num_workers=4)
 
     # 3. Initialize model and move to device
     device = torch.device(config.device)
     input_dim = X_train.shape[1]
-    autoencoder = Autoencoder(
-        input_dim=input_dim,
-        hidden_dim=config.model.hidden_dim,
-        dropout=config.model.dropout
-    ).to(device)
+    autoencoder = Autoencoder(input_dim=input_dim, hidden_dim=config.model.hidden_dim, dropout=config.model.dropout).to(
+        device
+    )
 
     # 4. Optimizer & Loss
     opt_class = getattr(torch.optim, config.training.optimizer)
-    optimizer = opt_class(
-        autoencoder.parameters(),
-        lr=config.training.lr,
-        weight_decay=config.training.weight_decay
-    )
+    optimizer = opt_class(autoencoder.parameters(), lr=config.training.lr, weight_decay=config.training.weight_decay)
     criterion = nn.MSELoss()
 
     print(f"Starting training on {device}...")
@@ -71,7 +59,7 @@ def train():
 
         if (epoch + 1) % 10 == 0:
             avg_loss = epoch_loss / len(train_loader)
-            print(f'Epoch [{epoch + 1}/{config.training.epochs}], Loss: {avg_loss:.4f}')
+            print(f"Epoch [{epoch + 1}/{config.training.epochs}], Loss: {avg_loss:.4f}")
 
     # 6. Save Model
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
