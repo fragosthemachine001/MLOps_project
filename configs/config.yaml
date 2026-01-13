@@ -10,7 +10,7 @@ model:
 
 # Training hyperparameters
 training:
-  batch_size: 64
+  batch_size: 1024
   lr: 0.001
   epochs: 50
   optimizer: "Adam"
@@ -23,3 +23,7 @@ evaluation:
   model_filename: "autoencoder.pt"
   metrics: ["precision", "recall", "f1", "roc_auc"]
   save_plots: True
+
+hydra:
+  job:
+    chdir: false

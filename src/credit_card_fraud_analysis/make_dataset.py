@@ -8,6 +8,7 @@ PROCESSED_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "processed"
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def fetch_kaggle_dataset(dataset: str, filename: str) -> Path:
     """
     Fetch dataset from Kaggle if it does not already exist.
@@ -50,6 +51,7 @@ def fetch_kaggle_dataset(dataset: str, filename: str) -> Path:
         raise FileNotFoundError(f"{filename} not found after Kaggle download")
 
     return output_file
+
 
 if __name__ == "__main__":
     fetch_kaggle_dataset(
