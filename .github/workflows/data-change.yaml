@@ -1,0 +1,50 @@
+name: Data-change checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "src/data/**"
+      - "configs/**"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".github/workflows/data-change.yaml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "src/data/**"
+      - "configs/**"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".github/workflows/data-change.yaml"
+
+jobs:
+  data-checks:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip setuptools wheel
+          pip install -r requirements.txt
+          pip install -r requirements_dev.txt
+
+      # Lightweight: unit tests only (fast)
+      - name: Run tests related to data
+        run: |
+          pytest -q -k "data"
