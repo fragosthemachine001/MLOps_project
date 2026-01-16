@@ -19,3 +19,5 @@ coverage
 pytest==8.3.4
 pytorch-lightning>=2.6.0
 pre-commit
+requests
+locust

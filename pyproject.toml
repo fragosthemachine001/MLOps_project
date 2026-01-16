@@ -30,4 +30,23 @@ line-length = 120
 select = ["I", "F", "E"]
 
 [tool.coverage.run]
-omit = ["tests/*"]
+source = ["src/credit_card_fraud_analysis"]
+omit = [
+    "src/tests/*",
+    "**/__init__.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 50
+exclude_lines = [
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
+
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+pythonpath = ["src"]
+addopts = "-v"
