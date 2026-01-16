@@ -1,1 +1,3 @@
-Hello
+C:\Users\georg\Desktop\mlops\MLOps_old_mine\src\credit_card_fraud_analysis\train.py
+C:\Users\georg\Desktop\mlops\MLOps_old_mine\src\credit_card_fraud_analysis\utils\my_logger.py
+C:\Users\georg\Desktop\mlops\MLOps_old_mine\requirements.txt
