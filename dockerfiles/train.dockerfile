@@ -1,20 +1,23 @@
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+FROM python:3.12-slim
 
-
-RUN apt update && \
-    apt install --no-install-recommends -y build-essential gcc && \
-    apt clean && rm -rf /var/lib/apt/lists/*
+# System dependencies (minimal)
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y gcc && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock requirements.txt README.md ./
+# Install Python dependencies (no cache to avoid disk issues)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-#Cache dependencies to avoid re-downloading
-ENV UV_LINK_MODE=copy
-RUN --mount=type=cache,target=/root/.cache/uv uv sync
-
-RUN mkdir -p /app/models /app/reports/figures
+# Copy source code and data
 COPY src/ src/
 COPY data/ data/
 
-ENTRYPOINT ["uv", "run", "src/credit_card_fraud_analysis/train.py"]
+# Create output folders
+RUN mkdir -p /app/models /app/reports/figures
+
+# Run training
+ENTRYPOINT ["python", "src/credit_card_fraud_analysis/train.py"]
+

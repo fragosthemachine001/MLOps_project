@@ -9,10 +9,11 @@ from sklearn.metrics import (
 )
 
 from credit_card_fraud_analysis.data import preprocess_data
+from credit_card_fraud_analysis.hydra_config_loader import load_config
 from credit_card_fraud_analysis.model import Autoencoder
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
-from credit_card_fraud_analysis.hydra_config_loader import load_config
+
 
 app = typer.Typer(add_completion=False)
 

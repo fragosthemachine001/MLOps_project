@@ -1,6 +1,6 @@
 # Global settings
 seed: 42
-device: "cpu" # or "cuda"
+device: "cpu"  # or "cuda"
 
 # Model architecture
 model:
@@ -16,6 +16,21 @@ training:
   optimizer: "Adam"
   weight_decay: 1e-5
   early_stopping_patience: 5
+  profiling: false
+
+# PyTorch Lightning trainer settings
+trainer:
+  log_every_n_steps: 10
+  accelerator: "auto"   # Lightning decides cpu / gpu
+  deterministic: true
+
+# Weights & Biases logging
+wandb:
+  enabled: true
+  project: "mlops-credit-card-fraud"
+  entity: null          # set only if using a team account
+  name: "lit-autoencoder"
+  log_model: true
 
 # Evaluation and Anomaly Detection
 evaluation:
@@ -27,3 +42,7 @@ evaluation:
 hydra:
   job:
     chdir: false
+
+
+
+
