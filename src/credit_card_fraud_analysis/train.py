@@ -65,6 +65,28 @@ def train():
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     model_path = MODELS_DIR / config.evaluation.model_filename
     torch.save(autoencoder.state_dict(), model_path)
+
+    dummy_input = torch.randn(1, input_dim).to(device)
+    onnx_path = MODELS_DIR / config.evaluation.model_filename.replace(".pt", ".onnx").replace(".pth", ".onnx")
+
+    print(f"Exporting model to ONNX at: {onnx_path}")
+
+    torch.onnx.export(
+        autoencoder,
+        (dummy_input,),
+        onnx_path,
+        export_params=True,
+        opset_version=12,
+        do_constant_folding=True,
+        input_names=['input'],
+        output_names=['output'],
+        dynamic_axes={
+            'input': {0: 'batch_size'},
+            'output': {0: 'batch_size'}
+        }
+    )
+    print("Export successful!")
+
     print(f"Training complete. Model saved to: {model_path}")
 
 

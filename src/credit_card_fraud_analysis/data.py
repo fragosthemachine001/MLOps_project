@@ -81,20 +81,21 @@ def compare_plot(X: np.ndarray, y: np.ndarray, X_resampled: np.ndarray, y_resamp
 
 
 def generate_train_data(df):
-    # Create X and y from the prep_data function
+    # 1. Prepare X and y from the raw data
     X, y = prep_data(df)
-    print(f"X shape: {X.shape}\ny shape: {y.shape}")
-    # Define the resampling method
-    method = SMOTE()
 
-    # Create the resampled feature set
-    X_resampled, y_resampled = method.fit_resample(X, y)
-    # Plot the resampled data
-    pd.Series(y).value_counts()
-    pd.Series(y_resampled).value_counts()
-    compare_plot(X, y, X_resampled, y_resampled, method="SMOTE")
-    X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.3, random_state=0)
-    return X_train, X_test, y_train, y_test
+    # 2. Split first: 70% train, 30% test
+    # This keeps the test set "unseen" and realistically imbalanced.
+    X_train_raw, X_test, y_train_raw, y_test = train_test_split(
+        X, y, test_size=0.3, random_state=0, stratify=y
+    )
+
+    # 3. Apply SMOTE ONLY to the training data
+    method = SMOTE(random_state=42)
+    X_train_resampled, y_train_resampled = method.fit_resample(X_train_raw, y_train_raw)
+
+    # Return perfectly balanced training data and realistically imbalanced test data
+    return X_train_resampled, X_test, y_train_resampled, y_test
 
 
 def transform_data(X_train, X_test):
