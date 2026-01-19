@@ -29,3 +29,5 @@ onnx
 prometheus-client
 evidently>=0.5.1
 pydantic>=2.6
+dvc>=3.0
+dvc-gs>=3.0
