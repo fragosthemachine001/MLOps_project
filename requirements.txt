@@ -26,3 +26,6 @@ streamlit>=1.28.2
 httpx
 onnxruntime
 onnx
+prometheus-client
+evidently>=0.5.1
+pydantic>=2.6

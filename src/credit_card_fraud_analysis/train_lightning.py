@@ -1,6 +1,7 @@
 # src/credit_card_fraud_analysis/train_lightning.py
 from pathlib import Path
 
+import pandas as pd
 import pytorch_lightning as pl
 import torch
 import typer
@@ -33,6 +34,10 @@ def train():
         logger.info("Starting data preprocessing...")
         X_train, _, _, _, X_train_tensor, _ = preprocess_data()
         logger.info(f"Data preprocessing complete. Training data shape: {X_train_tensor.shape}")
+
+        reference_df = pd.DataFrame(X_train)
+        reference_df.to_csv(MODELS_DIR / "reference_data.csv", index=False)
+        logger.info("Reference data saved for drift monitoring.")
 
         # 2) Create DataLoader
         logger.debug(f"Creating DataLoader with batch size: {config.training.batch_size}")
