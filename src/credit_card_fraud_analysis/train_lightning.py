@@ -9,12 +9,11 @@ from hydra import compose, initialize
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader, TensorDataset
-
-from credit_card_fraud_analysis.data import preprocess_data
 from credit_card_fraud_analysis.hydra_config_loader import load_config
 from credit_card_fraud_analysis.lightning_module import LitAutoEncoder
 from credit_card_fraud_analysis.utils.my_logger import logger
 import onnxruntime as rt
+from credit_card_fraud_analysis.data import MyDataset, preprocess_data
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
 app = typer.Typer()
@@ -41,12 +40,13 @@ def train():
 
         # 2) Create DataLoader
         logger.debug(f"Creating DataLoader with batch size: {config.training.batch_size}")
-        train_dataset = TensorDataset(X_train_tensor, X_train_tensor)
+        train_dataset = MyDataset(X_train_tensor)
         train_loader = DataLoader(
             train_dataset,
             batch_size=config.training.batch_size,
             shuffle=True,
-            num_workers=0,
+            num_workers=4,
+            pin_memory=True,
         )
         logger.info(f"DataLoader created with {len(train_dataset)} samples, {len(train_loader)} batches")
 

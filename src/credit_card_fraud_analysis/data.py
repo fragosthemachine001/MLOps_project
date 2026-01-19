@@ -15,19 +15,26 @@ RAW_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 
 
 class MyDataset(Dataset):
-    """My custom dataset."""
+    """Custom dataset for Credit Card Fraud."""
 
-    def __init__(self, data_path: Path) -> None:
-        self.data_path = data_path
+    def __init__(self, data_tensor: torch.Tensor, transform=None) -> None:
+        # CHANGE: Accept the tensor directly instead of a path
+        self.data = data_tensor
+        self.transform = transform
 
     def __len__(self) -> int:
         """Return the length of the dataset."""
+        return self.data.shape[0]
 
     def __getitem__(self, index: int):
         """Return a given sample from the dataset."""
+        sample = self.data[index]
 
-    def preprocess(self, output_folder: Path) -> None:
-        """Preprocess the raw data and save it to the output folder."""
+        if self.transform:
+            sample = self.transform(sample)
+
+        # For autoencoders, the target is the input itself
+        return sample, sample
 
 
 def prep_data(df: pd.DataFrame) -> (np.ndarray, np.ndarray):

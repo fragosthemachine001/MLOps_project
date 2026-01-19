@@ -14,7 +14,6 @@ from prometheus_client import CollectorRegistry, Counter, Histogram, Summary, ma
 from credit_card_fraud_analysis.monitoring_utils import generate_drift_report, log_to_database
 from fastapi.responses import HTMLResponse
 from fastapi import BackgroundTasks
-from evidently import Report
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 MODELS_DIR = BASE_DIR / "models"
@@ -101,6 +100,13 @@ async def lifespan(app: FastAPI):
     except Exception:
         app.state.threshold = 0.005
 
+    quant_path = MODELS_DIR / "optimized_model.onnx"
+    if quant_path.exists():
+        logger.info("Loading Quantized ONNX model for /predict_optimized")
+        app.state.ort_session_quant = ort.InferenceSession(str(quant_path))
+    else:
+        logger.warning("Quantized model not found. /predict_optimized will fail.")
+
     yield
     # Cleanup
     if app.state.model: del app.state.model
@@ -174,3 +180,35 @@ def monitoring():
     reference_path = MODELS_DIR / "reference_data.csv"
     json_str = generate_drift_report(reference_path)
     return json_str
+
+
+@app.post("/predict_optimized")
+async def predict_optimized(data: TransactionRequest, background_tasks: BackgroundTasks):
+    try:
+        session = app.state.ort_session_quant
+        input_data = np.array([data.features], dtype=np.float32)
+        input_name = session.get_inputs()[0].name
+
+        with request_latency.time():
+            outputs = session.run(None, {input_name: input_data})
+            reconstruction = outputs[0]
+            mse_loss = np.mean((input_data - reconstruction) ** 2)
+
+        is_fraud = bool(mse_loss > app.state.threshold)
+
+        background_tasks.add_task(
+            log_to_database,
+            data.features,
+            float(mse_loss),
+            is_fraud
+        )
+
+        return {
+            "is_fraud": is_fraud,
+            "reconstruction_error": float(mse_loss),
+            "engine": "onnx_quantized_8bit",
+            "optimization_techniques": ["pruning", "quantization"]
+        }
+    except Exception as e:
+        error_counter.inc()
+        raise HTTPException(status_code=500, detail=str(e))
