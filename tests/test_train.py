@@ -3,6 +3,7 @@
 import pytest
 import torch
 import torch.nn as nn
+
 from credit_card_fraud_analysis.data import RAW_DATA_DIR
 from credit_card_fraud_analysis.hydra_config_loader import load_config
 from credit_card_fraud_analysis.model import Autoencoder
