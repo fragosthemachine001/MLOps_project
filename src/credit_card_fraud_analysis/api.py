@@ -199,7 +199,7 @@ def monitoring():
 
 @app.post("/predict_optimized")
 async def predict_optimized(data: TransactionRequest, background_tasks: BackgroundTasks):
-    if ort is None or app.state.ort_session_qaunt is None:
+    if ort is None or app.state.ort_session_quant is None:
         raise HTTPException(status_code=503, detail="Quantized ONNX session not available.")
 
     try:
