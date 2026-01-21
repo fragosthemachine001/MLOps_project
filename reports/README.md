@@ -642,7 +642,7 @@ These features enhance the production-readiness and user experience of our MLOps
 >
 > Answer:
 
-The starting point of our MLOps architecture is our local development setup, where we integrated PyTorch Lightning for model development, Hydra for configuration management, Weights & Biases for experiment tracking, and DVC for data version control. Our development environment includes comprehensive testing suites, Docker containers for reproducible deployments, and pre-commit hooks for code quality.
+The starting point of our [MLOps architecture](figures/q29.png) is our local development setup, where we integrated PyTorch Lightning for model development, Hydra for configuration management, Weights & Biases for experiment tracking, and DVC for data version control. Our development environment includes comprehensive testing suites, Docker containers for reproducible deployments, and pre-commit hooks for code quality.
 
 Whenever we commit code and push to GitHub, it automatically triggers multiple CI/CD workflows through GitHub Actions. These include unit testing across multiple operating systems (Ubuntu, Windows, macOS) and Python versions (3.11, 3.12), code linting with Ruff, Docker image building, and specialized workflows for data and model changes. The data change workflow uses DVC to validate data integrity and generates automated reports using CML.
 
