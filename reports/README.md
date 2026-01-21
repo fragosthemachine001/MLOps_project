@@ -595,7 +595,11 @@ An exampl of a triggered workflow can be found here
 >
 > Answer:
 
---- question 27 fill here ---
+During the project development, our 4-member team (Group 27) utilized several GCP services for the MLOps pipeline. While specific credit amounts weren't tracked individually per member, the team collectively used approximately 50-100 credits throughout the project development phase.
+
+The most expensive service was likely Cloud Build due to frequent Docker image builds for the training pipeline and API deployment, followed by Artifact Registry for storing multiple Docker images (training, API, and frontend containers). Google Cloud Storage for DVC remote storage was relatively inexpensive, consuming minimal storage costs for the credit card fraud dataset.
+
+Working in the cloud provided significant benefits including seamless collaboration through shared storage, automated CI/CD pipelines, and scalable deployment options via Cloud Run. However, the learning curve for GCP services and managing costs required careful monitoring. The cloud infrastructure enabled us to implement a complete MLOps workflow with version control, automated training, and production deployment that wouldn't have been feasible with local resources alone.
 
 ### Question 28
 
@@ -611,7 +615,17 @@ An exampl of a triggered workflow can be found here
 >
 > Answer:
 
---- question 28 fill here ---
+We implemented several extra features in our project beyond the standard requirements:
+
+Streamlit Frontend: We created a comprehensive web interface using Streamlit that provides an interactive user experience for credit card fraud detection. The frontend includes multiple input methods (manual entry, sample transactions, CSV upload), real-time fraud predictions with visual risk indicators, and detailed error analysis with charts. We implemented this to make the model accessible to non-technical users and demonstrate the practical application.
+
+Data Drift Detection Service: We implemented a monitoring system using the Evidently library that tracks data drift between reference and current data. The API exposes a /monitoring endpoint that generates drift reports in JSON format, allowing real-time monitoring of model performance degradation.
+
+Comprehensive Prometheus Metrics: Beyond basic API monitoring, we instrumented our FastAPI application with detailed metrics including request counters, latency histograms, error counters, and feature summary statistics. The metrics are exposed via a /metrics endpoint for integration with monitoring systems.
+
+Model Optimization Pipeline: We implemented model pruning and ONNX optimization (scalable.py) with dynamic quantization to improve inference performance, reducing model size while maintaining accuracy.
+
+These features enhance the production-readiness and user experience of our MLOps pipeline.
 
 ### Question 29
 
@@ -628,7 +642,15 @@ An exampl of a triggered workflow can be found here
 >
 > Answer:
 
---- question 29 fill here ---
+The starting point of our MLOps architecture is our local development setup, where we integrated PyTorch Lightning for model development, Hydra for configuration management, Weights & Biases for experiment tracking, and DVC for data version control. Our development environment includes comprehensive testing suites, Docker containers for reproducible deployments, and pre-commit hooks for code quality.
+
+Whenever we commit code and push to GitHub, it automatically triggers multiple CI/CD workflows through GitHub Actions. These include unit testing across multiple operating systems (Ubuntu, Windows, macOS) and Python versions (3.11, 3.12), code linting with Ruff, Docker image building, and specialized workflows for data and model changes. The data change workflow uses DVC to validate data integrity and generates automated reports using CML.
+
+From GitHub, our pipeline integrates with Google Cloud Platform services. We use Cloud Storage as the remote backend for DVC to store our credit card fraud dataset. Cloud Build automatically builds and pushes Docker images to the Artifact Registry whenever code changes are detected. We maintain separate containers for training (train.dockerfile), API inference (api.dockerfile), and the Streamlit frontend (frontend.dockerfile).
+
+The deployment phase utilizes Cloud Run to host both our FastAPI backend and Streamlit frontend as serverless containers. The backend provides fraud prediction endpoints with Prometheus monitoring, data drift detection using Evidently, and ONNX optimization for improved inference performance. The frontend offers an intuitive web interface for users to input transaction data and receive fraud predictions with detailed visualizations.
+
+Users access the system through their web browsers, where they can analyze transactions using multiple input methods (manual entry, CSV upload, or sample data). The architecture supports real-time predictions, model monitoring, and automatic scaling based on demand. The entire pipeline ensures reproducibility, continuous integration, and seamless deployment from development to production.
 
 ### Question 30
 
@@ -642,7 +664,17 @@ An exampl of a triggered workflow can be found here
 >
 > Answer:
 
---- question 30 fill here ---
+The biggest challenges in our project revolved around environment consistency and deployment complexity. With a team of 4 members working across different operating systems, we spent considerable time ensuring that the same code worked reliably on Windows, macOS, and Linux. The path handling differences became particularly problematic when setting up the PYTHONPATH for imports, which led us to create platform-specific launch scripts (start_system.bat) and implement cross-platform compatibility in our tasks.py using the WINDOWS = os.name == "nt" flag.
+
+Docker configuration presented another significant hurdle. We struggled with getting the correct module paths working inside containers, especially for the API deployment. The initial api.dockerfile had incorrect import paths (src.api.main:app instead of src.credit_card_fraud_analysis.api:app), which caused numerous failed deployments. We overcame this by implementing comprehensive integration tests and adding proper error handling to catch these issues early.
+
+Google Cloud Platform integration consumed substantial development time. Setting up DVC with GCS storage, configuring service accounts for Cloud Build, and managing artifact registry permissions were more complex than anticipated. The authentication between local development, GitHub Actions, and GCP services required careful coordination of secrets management and IAM roles.
+
+CI/CD pipeline complexity grew beyond our initial expectations. Implementing matrix testing across multiple OS and Python versions, while maintaining reasonable execution times required extensive caching strategies and workflow optimization. We had to balance thorough testing with CI cost considerations.
+
+The frontend-backend communication also presented challenges, particularly with environment variable management and service discovery. We solved this by implementing robust error handling and creating fallback mechanisms for backend URL resolution.
+
+To overcome these challenges, we adopted a systematic debugging approach using comprehensive logging, extensive unit and integration testing, and incremental deployment strategies. The implementation of dev containers significantly improved development environment consistency and reduced setup friction for team members.
 
 ### Question 31
 
@@ -660,4 +692,6 @@ An exampl of a triggered workflow can be found here
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+All four team members - s242973 (Dionysios Sellinas), s253542 (Christos Psallidas), s253560 (Dimitrios Dimitriou), and s242831 (Georgios Fragkiadoulakis) - contributed equally to the project development. The team collaboratively worked on all major components including the initial cookiecutter project setup, cloud infrastructure configuration with GCP and DVC, PyTorch Lightning model development for credit card fraud detection, comprehensive CI/CD pipeline implementation with GitHub Actions, Docker containerization for training/API/frontend services, FastAPI backend development with Prometheus monitoring, Streamlit frontend creation, extensive testing strategies (unit, integration, and performance), cross-platform compatibility ensuring support for Windows/macOS/Linux, data version control setup, deployment automation, and comprehensive documentation. Each member participated in code reviews, debugging sessions, and quality assurance processes while maintaining consistent coding standards through pre-commit hooks and Ruff formatting.
+
+We extensively used GitHub Copilot for code completion and boilerplate generation, particularly helpful for writing comprehensive test suites and Docker configurations. ChatGPT was utilized for debugging complex configuration issues, especially with GCP authentication, CI/CD pipeline troubleshooting, and resolving environment-specific compatibility problems. We also used AI tools for optimizing our monitoring and logging implementations, and for generating comprehensive docstrings and code documentation.
