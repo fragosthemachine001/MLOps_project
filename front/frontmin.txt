@@ -1,0 +1,68 @@
+front\start_system.bat
+
+## Frontend Directory Overview
+
+The front directory contains all the user-facing components and utilities for the 
+Credit Card Fraud Detection system. Here's what each file does:
+
+### 🎯 Core Application Files
+
+**frontend.py** - The main Streamlit web application
+- Creates an interactive web interface for credit card fraud detection
+- Allows users to input transaction features or use sample data
+- Sends requests to the backend API (`/predict` endpoint)
+- Displays fraud prediction results in a user-friendly format
+- Handles error cases and connection issues gracefully
+
+**frontend.dockerfile** - Docker configuration for frontend
+- Creates a containerized version of the Streamlit frontend
+- Based on Python 3.11-slim image
+- Exposes port 8501 (Streamlit's default port)
+- Includes build tools and dependencies for deployment
+
+**requirements_frontend.txt** - Frontend dependencies
+- Lists minimal Python packages needed for the frontend:
+  - `streamlit` - Web app framework
+  - `pandas` - Data manipulation
+  - `requests` - HTTP client for API calls
+  - `numpy` - Numerical operations
+
+### 🚀 Launch Scripts (Now Portable!)
+
+**start_system.bat** - Complete system launcher
+- Starts both backend API (port 8000) and frontend (port 8501)
+- Opens separate terminal windows for each service
+- Provides user-friendly status messages and URLs
+
+**run_api.bat** - Backend API launcher
+- Starts just the FastAPI backend server
+- Uses Uvicorn with auto-reload for development
+
+**run_frontend.bat** - Frontend launcher
+- Starts just the Streamlit frontend application
+- Sets backend URL environment variable
+
+**run_training.bat** - Model training launcher
+- Executes the PyTorch Lightning training pipeline
+- Sets up proper Python path for imports
+
+### 📚 Documentation Files
+
+**front.txt** - Frontend module documentation
+- Explains the concept of frontend vs backend architecture
+- Discusses microservices vs monolithic approaches
+- Provides learning material about web frameworks
+- Contains tutorial exercises and code examples
+
+**frontmin.txt** - Minimal launcher reference
+- Simple file pointing to the main system launcher
+
+## Architecture Overview
+
+This frontend implements a **microservices architecture** where:
+
+1. **Backend** (API): Handles ML model inference via FastAPI
+2. **Frontend** (Web App): Provides user interface via Streamlit
+3. **Communication**: HTTP requests between frontend and backend
+
+The setup allows independent scaling and deployment of each component, making it production-ready for cloud deployment.

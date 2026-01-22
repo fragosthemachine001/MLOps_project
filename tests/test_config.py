@@ -1,4 +1,5 @@
 import pytest
+
 from credit_card_fraud_analysis.hydra_config_loader import load_config
 
 
@@ -11,12 +12,15 @@ def test_load_config():
     assert "evaluation" in config
 
 
-@pytest.mark.parametrize("param_path, expected_type", [
-    ("model.hidden_dim", int),
-    ("training.lr", float),
-    ("training.epochs", int),
-    ("device", str),
-])
+@pytest.mark.parametrize(
+    "param_path, expected_type",
+    [
+        ("model.hidden_dim", int),
+        ("training.lr", float),
+        ("training.epochs", int),
+        ("device", str),
+    ],
+)
 def test_config_parameter_types(param_path, expected_type):
     """Verify specific config values have the correct types."""
     config = load_config()

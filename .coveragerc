@@ -1,0 +1,11 @@
+[run]
+source = src/credit_card_fraud_analysis
+omit =
+    */visualize.py
+    */scalable.py
+    */evaluate.py
+    */monitoring_utils.py
+
+[report]
+fail_under = 50
+show_missing = True

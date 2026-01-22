@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code and data
 COPY src/ src/
+COPY data/ data/
 
 # Create output folders
 RUN mkdir -p /app/models /app/reports/figures

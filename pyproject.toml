@@ -25,16 +25,29 @@ dependencies = {file = ["requirements.txt"]}
 
 [tool.ruff]
 line-length = 120
+src = ["src"]
 
 [tool.ruff.lint]
 select = ["I", "F", "E"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["credit_card_fraud_analysis"]
+combine-as-imports = true
+
 [tool.coverage.run]
-source = ["src/credit_card_fraud_analysis"]
+source = ["src"]
 omit = [
-    "src/tests/*",
-    "**/__init__.py",
+  "src/tests/*",
+  "**/__init__.py",
+
+  # CLI / entrypoints (not unit-tested)
+  "src/credit_card_fraud_analysis/train.py",
+  "src/credit_card_fraud_analysis/train_lightning.py",
+  "src/credit_card_fraud_analysis/train_lightning2.py",
+  "src/credit_card_fraud_analysis/make_dataset.py",
+  "src/credit_card_fraud_analysis/api.py",
 ]
+
 
 [tool.coverage.report]
 show_missing = true

@@ -12,7 +12,7 @@ model:
 training:
   batch_size: 1024
   lr: 0.001
-  epochs: 50
+  epochs: 30
   optimizer: "Adam"
   weight_decay: 1e-5
   early_stopping_patience: 5
@@ -42,7 +42,3 @@ evaluation:
 hydra:
   job:
     chdir: false
-
-
-
-

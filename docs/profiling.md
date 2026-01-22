@@ -1,4 +1,4 @@
-## Profiling 
+## Profiling
 
 Training was profiled using Python cProfile on the PyTorch Lightning pipeline.
 

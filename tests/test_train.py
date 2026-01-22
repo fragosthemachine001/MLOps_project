@@ -1,17 +1,15 @@
 # src/tests/test_train.py
-import os
-from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
-import torch.nn as nn
-from credit_card_fraud_analysis.model import Autoencoder
-from credit_card_fraud_analysis.hydra_config_loader import load_config
-from credit_card_fraud_analysis.data import RAW_DATA_DIR
-from typer.testing import CliRunner
 import torch
+import torch.nn as nn
+
+from credit_card_fraud_analysis.data import RAW_DATA_DIR
+from credit_card_fraud_analysis.hydra_config_loader import load_config
+from credit_card_fraud_analysis.model import Autoencoder
 
 DATA_MISSING = not (RAW_DATA_DIR / "creditcard.csv").exists()
+
 
 @pytest.mark.parametrize("batch_size", [1, 16, 64])
 def test_model_forward_pass_shapes(batch_size):

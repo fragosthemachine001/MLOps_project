@@ -1,16 +1,19 @@
 # src/credit_card_fraud_analysis/train_lightning.py
 from pathlib import Path
 
+import onnxruntime as rt
+import pandas as pd
 import pytorch_lightning as pl
 import torch
 import typer
-from hydra import compose, initialize
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 
-from credit_card_fraud_analysis.data import preprocess_data
+from credit_card_fraud_analysis.data import MyDataset, preprocess_data
+from credit_card_fraud_analysis.hydra_config_loader import load_config
 from credit_card_fraud_analysis.lightning_module import LitAutoEncoder
+from credit_card_fraud_analysis.utils.my_logger import logger
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
 app = typer.Typer()
@@ -18,72 +21,136 @@ app = typer.Typer()
 
 @app.command()
 def train():
+    config = load_config()
     """
     Train the autoencoder using PyTorch Lightning + W&B logging.
     """
-    # Load Hydra config
-    with initialize(version_base="1.2", config_path="../../configs"):
-        config = compose(config_name="config")
+    try:
+        torch.manual_seed(config.seed)
+        logger.debug(f"Random seed set to: {config.seed}")
 
-    torch.manual_seed(config.seed)
+        # 1) Load / preprocess data
+        logger.info("Starting data preprocessing...")
+        X_train, _, _, _, X_train_tensor, _ = preprocess_data()
+        logger.info(f"Data preprocessing complete. Training data shape: {X_train_tensor.shape}")
 
-    # 1) Load / preprocess data
-    print("Preprocessing data...")
-    X_train, _, _, _, X_train_tensor, _ = preprocess_data()
+        reference_df = pd.DataFrame(X_train)
+        reference_df.to_csv(MODELS_DIR / "reference_data.csv", index=False)
+        logger.info("Reference data saved for drift monitoring.")
 
-    # 2) Create DataLoader
-    train_dataset = TensorDataset(X_train_tensor, X_train_tensor)
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.training.batch_size,
-        shuffle=True,
-        num_workers=0,
-    )
+        # 2) Create DataLoader
+        logger.debug(f"Creating DataLoader with batch size: {config.training.batch_size}")
+        train_dataset = MyDataset(X_train_tensor)
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=config.training.batch_size,
+            shuffle=True,
+            num_workers=4,
+            pin_memory=True,
+        )
+        logger.info(f"DataLoader created with {len(train_dataset)} samples, {len(train_loader)} batches")
 
-    # 3) Lightning Module
-    model = LitAutoEncoder(
-        input_dim=X_train_tensor.shape[1],
-        hidden_dim=config.model.hidden_dim,
-        dropout=config.model.dropout,
-        lr=config.training.lr,
-        weight_decay=config.training.weight_decay,
-    )
+        # 3) Lightning Module
+        logger.debug("Initializing autoencoder model...")
+        input_dim = X_train_tensor.shape[1]
+        model = LitAutoEncoder(
+            input_dim=input_dim,
+            hidden_dim=config.model.hidden_dim,
+            dropout=config.model.dropout,
+            lr=config.training.lr,
+            weight_decay=config.training.weight_decay,
+        )
+        logger.info(
+            (
+                f"Model initialized - Input dim: {input_dim}, "
+                f"Hidden dim: {config.model.hidden_dim}, "
+                f"LR: {config.training.lr}"
+            )
+        )
 
-    # 4) W&B Logger (logs metrics + can store model checkpoints as artifacts)
-    wandb_logger = WandbLogger(
-        project=getattr(config, "wandb", {}).get("project", "mlops-credit-card-fraud"),
-        name=getattr(config, "wandb", {}).get("name", "lit-autoencoder"),
-        log_model=True,
-    )
+        # Check for potential issues
+        if config.training.lr < 0.001:
+            logger.warning(f"Learning rate is very low: {config.training.lr}")
 
-    # 5) Callbacks (checkpoint + LR monitor)
-    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        # 4) W&B Logger (logs metrics + can store model checkpoints as artifacts)
+        wandb_project = getattr(config, "wandb", {}).get("project", "mlops-credit-card-fraud")
+        wandb_name = getattr(config, "wandb", {}).get("name", "lit-autoencoder")
+        logger.info(f"Setting up W&B logger - Project: {wandb_project}, Name: {wandb_name}")
 
-    callbacks = [
-        ModelCheckpoint(
-            dirpath=str(MODELS_DIR),
-            filename="lit-autoencoder-{epoch:02d}-{train_loss:.4f}",
-            save_top_k=1,
-            monitor="train_loss",
-            mode="min",
-        ),
-        LearningRateMonitor(logging_interval="epoch"),
-    ]
+        wandb_logger = WandbLogger(
+            project=wandb_project,
+            name=wandb_name,
+            log_model=True,
+        )
+        logger.debug("W&B logger configured successfully")
 
-    # 6) Trainer
-    trainer = pl.Trainer(
-        max_epochs=config.training.epochs,
-        accelerator="cpu" if config.device == "cpu" else "auto",
-        logger=wandb_logger,
-        callbacks=callbacks,
-        log_every_n_steps=10,
-        profiler="simple",
-    )
+        # 5) Callbacks (checkpoint + LR monitor)
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"Models directory created/verified: {MODELS_DIR}")
 
-    # 7) Train
-    trainer.fit(model, train_loader)
+        callbacks = [
+            ModelCheckpoint(
+                dirpath=str(MODELS_DIR),
+                filename="lit-autoencoder-{epoch:02d}-{train_loss:.4f}",
+                save_top_k=1,
+                monitor="train_loss",
+                mode="min",
+            ),
+            LearningRateMonitor(logging_interval="epoch"),
+        ]
+        logger.info(f"Callbacks configured - ModelCheckpoint saving to {MODELS_DIR}")
 
-    print(f"Done. Best checkpoint saved under: {MODELS_DIR}")
+        # 6) Trainer
+        device_type = "cpu" if config.device == "cpu" else "auto"
+        logger.info(f"Starting training on device: {device_type}")
+        logger.debug(
+            f"Training configuration - Epochs: {config.training.epochs}, Batch size: {config.training.batch_size}"
+        )
+
+        trainer = pl.Trainer(
+            max_epochs=config.training.epochs,
+            accelerator=device_type,
+            logger=wandb_logger,
+            callbacks=callbacks,
+            log_every_n_steps=10,
+            profiler="simple",
+        )
+        logger.debug("Trainer configured successfully")
+
+        # 7) Train
+        logger.info("Starting training loop")
+        trainer.fit(model, train_loader)
+        onnx_file_path = MODELS_DIR / "model.onnx"
+        optimized_onnx_file_path = MODELS_DIR / "optimized_model.onnx"
+        input_sample = torch.randn(1, input_dim)  # Dynamic input based on data
+
+        model.to_onnx(
+            onnx_file_path,
+            input_sample,
+            export_params=True,
+            opset_version=11,
+            input_names=["input"],
+            output_names=["output"],
+            # Allow variable batch sizes like in onnx_benchmark.py
+            dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+        )
+
+        onnx_str_path = str(onnx_file_path)
+        optimized_str_path = str(optimized_onnx_file_path)
+        sess_options = rt.SessionOptions()
+        sess_options.graph_optimization_level = rt.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+        sess_options.optimized_model_filepath = optimized_str_path
+        rt.InferenceSession(onnx_str_path, sess_options)
+        logger.info(f"Offline optimized model saved to: {optimized_onnx_file_path}")
+
+        logger.info("Training completed successfully")
+
+        logger.info(f"ONNX model exported to {onnx_file_path}")
+
+    except Exception as e:
+        logger.exception(f"Error during training: {e}")
+        logger.error("Something went wrong in training process")
+        raise
 
 
 if __name__ == "__main__":

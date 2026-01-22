@@ -1,6 +1,7 @@
 torch==2.6.0
 typer==0.15.2
 fastapi==0.115.12
+loguru>=0.7.0
 uvicorn==0.34.2
 matplotlib
 numpy
@@ -21,3 +22,13 @@ pytorch-lightning>=2.6.0
 pre-commit
 requests
 locust
+streamlit>=1.28.2
+httpx
+onnxruntime
+onnx
+prometheus-client
+evidently>=0.5.1
+pydantic>=2.6
+dvc>=3.0
+dvc-gs>=3.0
+ptflops>=0.7.3

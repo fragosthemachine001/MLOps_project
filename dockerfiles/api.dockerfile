@@ -1,29 +1,23 @@
 FROM python:3.12-slim
 
-# Prevent Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+ENV PYTHONPATH=/app:/app/src
 
 WORKDIR /app
 
-# Install system dependencies (minimal)
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install -r requirements.txt --no-cache-dir
 
-# Install Python dependencies
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
-
-# Copy application code
 COPY src/ src/
+COPY models/ models/
 
-# Expose API port
-EXPOSE 8000
-
-# Start FastAPI
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
+CMD ["sh", "-c", "uvicorn src.credit_card_fraud_analysis.api:app --host 0.0.0.0 --port ${PORT}"]

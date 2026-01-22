@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 import torch
 
-from credit_card_fraud_analysis.data import preprocess_data, RAW_DATA_DIR
+from credit_card_fraud_analysis.data import RAW_DATA_DIR, preprocess_data
+
 DATA_MISSING = not (RAW_DATA_DIR / "creditcard.csv").exists()
 
 
